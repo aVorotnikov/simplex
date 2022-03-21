@@ -2,21 +2,23 @@ import numpy as np
 from itertools import combinations
 import simplex as sx
 
+EPS = 0.000000001
+
 def get_basis_matrices(A):
     N = A.shape[0]
     M = A.shape[1]
 
-    basis_matrices = []
+    basis_matrs = []
     basis_combinations_indexes = []
     all_indexes = [i for i in range(M)]
 
     for i in combinations(all_indexes, N):
-        basis_matrix = A[:, i]
-        if np.linalg.det(basis_matrix) != 0:
-            basis_matrices.append(basis_matrix)
+        basis_matr = A[:, i]
+        if np.linalg.det(basis_matr) != 0:
+            basis_matrs.append(basis_matr)
             basis_combinations_indexes.append(i)
 
-    return basis_matrices, basis_combinations_indexes
+    return basis_matrs, basis_combinations_indexes
 
 
 def get_vectors(A, b):
@@ -27,20 +29,21 @@ def get_vectors(A, b):
     if M >= N:
         return vectors
     else:
-        basis_matrices, basis_combinations_indeces = get_basis_matrices(np.array(A))
+        basis_matrs, basis_combinations_indexes = get_basis_matrices(np.array(A))
 
-    for i in range(len(basis_matrices)):
-        solve = np.linalg.solve(basis_matrices[i], b)
-        if (len(solve[solve < 0]) != 0) or (len(solve[solve > 1e+15]) != 0):
+    for i in range(len(basis_matrs)):
+        solve = np.linalg.solve(basis_matrs[i], b)
+        if (len(solve[solve < -1 * EPS]) != 0) or (len(solve[solve > 1e+15]) != 0):
             continue
 
         vec = [0 for i in range(N)]
-        for j in range(len(basis_combinations_indeces[i])):
-            vec[basis_combinations_indeces[i][j]] = solve[j]
+        for j in range(len(basis_combinations_indexes[i])):
+            vec[basis_combinations_indexes[i][j]] = solve[j]
         vectors.append(vec)
-    return 
+    return vectors
 
-def solve_brute_force(A, b, c, v):
+
+def solve_brute_force(A, b, c):
     vectors = get_vectors(A, b)
     if len(vectors) == 0:
         return []
@@ -55,26 +58,6 @@ def solve_brute_force(A, b, c, v):
 
     return solution
 
-def extreme_points_search(N, B, A, b, c, v):
-    while any([c[j] > 0 for j in N]):
-        e = 0
-        while c[e] <= 0 or e not in N:
-            e += 1
-        delta = np.full(b.shape, np.Inf)
-        for i in B:
-            delta[i] = b[i] / A[i][e] if A[i][e] > 0 else np.Inf
-        l = np.argmin(delta)
-        if delta[l] is np.Inf:
-            return None
-        else:
-            N, B, A, b, c, v = pivot(N, B, A, b, c, v, l, e)
-
-    x = np.zeros(b.shape)
-    for i in B:
-        x[i] = b[i]
-    return x, v
-
 
 A, b, c = sx.parse_file('test.txt')
-N, B, A, b, c, v = sx.init_canonical(A, b, c)
-print(extreme_points_search(N, B, A, b, c, v))
+print(solve_brute_force(A, b, c))
