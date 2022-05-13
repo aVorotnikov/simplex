@@ -1,6 +1,6 @@
 from simplex import solve, parse_file, build_dual
 
-testfile = 'test2.txt'
+testfile = 'test.txt'
 
 A, b, c, n, indexes_not_bounded, mode = parse_file(testfile)
 
