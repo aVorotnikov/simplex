@@ -47,7 +47,7 @@ def solve_brute_force(A_in, b_in, c_in):
     A, b, c = get_canonical(A_in, b_in, c_in)
 
     from scipy.optimize import linprog
-    res = linprog(-c, A_eq=A, b_eq=b, bounds=[(0, None)]*len(c), method='simplex')
+    res = linprog(-c, A_eq=A, b_eq=b, bounds=[(0, None)]*len(c))
     print(f'Scipy solution: {res.x, -res.fun}')
 
     vectors = get_vectors(A, b)
