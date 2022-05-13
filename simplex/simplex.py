@@ -60,10 +60,9 @@ def parse_file(filename):
 
 def build_dual(A, b, c, n, indexes_not_bounded, mode):
     if mode.lower() == 'max':
-        mode = 'min'
+        return -A.T, -c, -b, n, indexes_not_bounded, 'max'
     else:
-        mode = 'max'
-    return -A.T, -c, b, n, indexes_not_bounded, mode
+        return -A.T, c, -b, n, indexes_not_bounded, 'max'
 
 
 def solve(A, b, c_in, n, indexes_not_bounded, mode, method='table'):

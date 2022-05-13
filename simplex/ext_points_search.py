@@ -11,7 +11,7 @@ def get_basis_matrices(A):
 
     for i in combinations(range(N), M):
         basis_matr = A[:, i]
-        if abs(np.linalg.det(basis_matr)) >= 1e-10:
+        if abs(np.linalg.det(basis_matr)) > 1e-12:
             basis_matrs.append(basis_matr)
             basis_combinations_indexes.append(i)
 
@@ -27,7 +27,7 @@ def get_vectors(A, b):
 
     for matrix, indexes in zip(*get_basis_matrices(A)):
         sol = np.linalg.solve(matrix, b)
-        if any(sol < -EPS):
+        if any(sol < -EPS) or any(sol > 1e16):
             continue
 
         vec = np.zeros((N, ))

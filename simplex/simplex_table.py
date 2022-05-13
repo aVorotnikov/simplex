@@ -103,8 +103,8 @@ def init_simplex(A_in, b_in, c_in):
 
 
 def simplex_table(A_input, b_input, c_input):
-    canonical = init_simplex(A_input, b_input, c_input)
-    #canonical = build_canonical(A_input, b_input, c_input)
+    #canonical = init_simplex(A_input, b_input, c_input)
+    canonical = build_canonical(A_input, b_input, c_input)
     if not canonical:
         return None
     N, B, A, b, c, v = canonical
