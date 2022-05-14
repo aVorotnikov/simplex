@@ -1,5 +1,8 @@
 import numpy as np
 
+from .simplex_table import simplex_table
+from .ext_points_search import solve_brute_force
+
 
 def parse_file(filename):
     n = 0
@@ -35,8 +38,6 @@ def parse_file(filename):
                 if sep != '=':
                     return None
                 c = np.array([float(coef) for coef in rhs.split()])
-                if mode == 'min':
-                    c *= -1
             else:
                 a = np.array([float(coef) for coef in lhs.split()])
                 bi = float(rhs)
@@ -54,22 +55,38 @@ def parse_file(filename):
         c = np.append(c, -c[i])
         A = np.append(A, -A.take(i, axis=1).reshape(len(b), 1), axis=1)
 
-    return A, b, c
+    return A, b, c, n, indexes_not_bounded, mode
 
 
-def init_canonical(A, b, c):
-    n = len(c) + len(b)
-    N = {i for i in range(len(c))}
-    B = {i for i in range(len(c), n)}
-    v = 0
-    Ac = np.zeros((n, n))
-    bc = np.zeros((n, 1))
-    cc = np.zeros((n, 1))
+def build_dual(A, b, c, n, indexes_not_bounded, mode):
+    if mode.lower() == 'max':
+        return -A.T, -c, -b, n, indexes_not_bounded, 'max'
+    else:
+        return -A.T, c, -b, n, indexes_not_bounded, 'max'
 
-    for i, ii in enumerate(range(len(c), n)):
-        bc[ii] = b[i]
-        cc[i] = c[i]
-        for j, jj in enumerate(range(len(c))):
-            Ac[ii][jj] = A[i][j]
 
-    return N, B, Ac, bc, cc, v
+def solve(A, b, c_in, n, indexes_not_bounded, mode, method='table'):
+    if mode.lower() == 'min':
+        c = -1 * c_in
+    else:
+        c = c_in
+    if method == 'table':
+        sol = simplex_table(A, b, c)
+    elif method == 'bruteforce':
+        sol = solve_brute_force(A, b, c)
+    else:
+        raise 'Choose correct method'
+
+    if not sol:
+        return None
+    else:
+        x, v = sol
+
+    if mode == 'min':
+        v = -v
+
+    for j, i in enumerate(indexes_not_bounded):
+        x[i] = x[i] - x[n + j]
+    x = x[:n]
+
+    return x, v
